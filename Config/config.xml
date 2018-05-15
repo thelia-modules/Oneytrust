@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <loops>
+        <loop name="oneytrust.loop" class="OneytrustScore\Loop\OneytrustScoreLoop" />
+    </loops>
+
+    <services>
+        <service id="oneytrust.manager" class="OneytrustScore\EventListeners\OneytrustManager" scope="request">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+        <service id="oneytrust.smarty.plugin" class="OneytrustScore\Smarty\Plugins\OneyTrust" scope="request">
+            <tag name="thelia.parser.register_plugin"/>
+        </service>
+    </services>
+
+</config>

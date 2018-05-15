@@ -1,0 +1,56 @@
+<div class="modal fade" id="oneytrust" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content ">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Liste des commandes OneyTrust</h4>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Commande</th>
+                            <th>Nom du client</th>
+                            <th>Date</th>
+                            <th>Montant</th>
+                            <th>Information OneyTrust</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {$orderidlist = []}
+                        {loop type="order" name="order-list" customer="*" status="2"}
+                            {if {is_oneytrust_payment_allow moduleId=$PAYMENT_MODULE}}
+                                {$orderidlist[] = $ID}
+                            {/if}
+                        {/loop}
+                        {$orderidlist = implode(',',$orderidlist)}
+                        {if $orderidlist}
+                            {loop type="oneytrust.loop" name="oneytrust" orderids=$orderidlist}
+                            <tr>
+                                <td><a href="{url path="/admin/order/update/$COMMANDE_ID"}">{$COMMANDE_REF}</a></td>
+                                <td><a href="{url path='/admin/customer/update' customer_id=$CUSTOMER_ID}">{$CUSTOMER_NAME}</a></td>
+                                <td><a href="{url path="/admin/OneyTrust/viewOrder/$COMMANDE_REF"}">{$COMMANDE_DATE}</td>
+                                <td>{format_number number=$COMMANDE_PRICE}</td>
+                                <td>{$MESSAGE}</td>
+                            </tr>
+                            {/loop}
+                            <input type="hidden" id="count-oneytrust-order" name="count-oneytrust-order" value="{count type="oneytrust.loop" orderids=$orderidlist}" />
+                        {/if}
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(function() {
+
+        $('#badge-count-oneytrust').html($('#count-oneytrust-order').val());
+
+    });
+</script>

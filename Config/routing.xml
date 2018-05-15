@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <route id="oneytrust_reload" path="/admin/module/oneytrust/try/order/reload">
+        <default key="_controller">OneytrustScore\Controller\OneytrustBackOfficeController::reLoadPayOrder</default>
+    </route>
+
+    <route id="admin.oneytrust.vieworder" path="/admin/OneyTrust/viewOrder/{order_reference}">
+        <default key="_controller">OneytrustScore\Controller\OneytrustBackOfficeController::viewOneytrustOrder</default>
+        <requirement key="orderReference">\d+</requirement>
+    </route>
+
+</routes>

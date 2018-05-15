@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database defaultIdMethod="native" name="thelia"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:noNamespaceSchemaLocation="../../../core/vendor/propel/propel/resources/xsd/database.xsd" >
+    <table name="Oneytrust" namespace="OneytrustScore\Model">
+        <column name="id" primaryKey="true" autoIncrement="true" required="true" type="INTEGER" />
+        <column name="commande" type="LONGVARCHAR" />
+        <column name="status" type="LONGVARCHAR" />
+        <column name="validation" type="LONGVARCHAR" />
+        <column name="motifs" type="LONGVARCHAR" />
+        <column name="evaldate" type="LONGVARCHAR" />
+        <column name="customerIp" type="LONGVARCHAR" />
+    </table>
+    <external-schema filename="local/config/schema.xml" referenceOnly="true" />
+</database>
