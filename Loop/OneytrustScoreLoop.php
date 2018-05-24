@@ -3,7 +3,10 @@
 namespace OneytrustScore\Loop;
 
 
+use OneytrustScore\Config\OneytrustConst;
+use OneytrustScore\Model\Oneytrust;
 use OneytrustScore\Model\OneytrustQuery;
+use OneytrustScore\OneytrustScore;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Thelia\Core\Template\Element\ArraySearchLoopInterface;
 use Thelia\Core\Template\Element\BaseLoop;
@@ -62,17 +65,22 @@ class OneytrustScoreLoop extends BaseLoop implements ArraySearchLoopInterface
      */
     public function buildArray()
     {
-        $orders = OrderQuery::create()->filterById($this->getOrderids())->orderByCreatedAt(Criteria::DESC)->find()->getData();
+        $orders = OrderQuery::create()->filterByStatusId(OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAID_STATUS))->orderByCreatedAt(Criteria::DESC)->find()->getData();
         $orderRefs = [];
         $result = [];
 
         /** @var \Thelia\Model\Order $order */
         foreach ($orders as $order) {
+            /** @noinspection PhpParamsInspection */
             $paymentType = ModuleQuery::create()->findOneById($order->getPaymentModuleId());
-            if (!$paymentType->getCode() == "Atos") {
+
+            /** Makes sure we only get orders with the correct payment type */
+            if (!in_array($paymentType->getId(), explode(",", OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST))))
+            {
                 continue ;
             }
 
+            /** @noinspection PhpParamsInspection */
             $customer = CustomerQuery::create()->findOneById($order->getCustomerId());
 
             /** Save order reference and initialize wait status */
@@ -95,7 +103,7 @@ class OneytrustScoreLoop extends BaseLoop implements ArraySearchLoopInterface
         foreach ($oneytrustOrders as $oneytrustOrder) {
             if ($key = $this->recursiveArraySearch($oneytrustOrder->getCommande(), $result)) {
                 $result[$key]['Oneytrust'] = $oneytrustOrder->toArray();
-                if ($oneytrustOrder->getEvaldate() != null) {
+                if ($oneytrustOrder->getValidation() != null) {
                     $result[$key]['Status'] = "oneytrust";
                 }
             }
@@ -105,7 +113,7 @@ class OneytrustScoreLoop extends BaseLoop implements ArraySearchLoopInterface
         foreach ($result as $key => $order) {
             if ($order['Status'] === 'wait') {
                 try {
-                    $analyse = \OneytrustScore\OneytrustScore::analyse($order['CommandeRef']);
+                    $analyse = OneytrustScore::analyse($order['CommandeRef']);
                     $xml = simplexml_load_string($analyse);
 
                     if ($xml->result['retour'] != 'trouvee') {
@@ -115,7 +123,7 @@ class OneytrustScoreLoop extends BaseLoop implements ArraySearchLoopInterface
                     }
 
                     if (null == $oneytrust = OneytrustQuery::create()->findOneByCommande($order['CommandeRef'])) {
-                        $oneytrust = new \OneytrustScore\Model\Oneytrust();
+                        $oneytrust = new Oneytrust();
                         $oneytrust->setCommande($order['CommandeRef']);
                     }
 

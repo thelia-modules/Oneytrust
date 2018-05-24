@@ -13,4 +13,12 @@
         <requirement key="orderReference">\d+</requirement>
     </route>
 
+    <route id="oneytrust.config.view" path="/admin/module/OneytrustScore">
+        <default key="_controller">OneytrustScore\Controller\OneytrustBackOfficeController::viewAction</default>
+    </route>
+
+    <route id="oneytrust.config.save" path="/admin/module/OneytrustScore/config" methods="post">
+        <default key="_controller">OneytrustScore\Controller\OneytrustBackOfficeController::saveAction</default>
+    </route>
+
 </routes>

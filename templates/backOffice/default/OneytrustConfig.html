@@ -1,0 +1,87 @@
+{extends file="admin-layout.tpl"}
+
+{block name="after-bootstrap-css"}
+
+{/block}
+
+{block name="no-return-functions"}
+    {$admin_current_location = 'module'}
+{/block}
+
+{block name="page-title"}{intl l='Configuration Oneytrust'}{/block}
+
+{block name="check-resource"}admin.module{/block}
+{block name="check-access"}view{/block}
+
+{block name="main-content"}
+    <div class="col-md-12">
+        {if $error_message}
+            <div class="alert alert-danger" role="alert">
+                {$error_message}
+            </div>
+        {/if}
+    </div>
+    <div class="col-md-12 row">
+        <div class="col-md-6 panel panel-default">
+            {form name="oneytrust_configuration_form" type="oneytrust_configuration_form"}
+                <form class="" action="{url path='/admin/module/OneytrustScore/config'}" method="post">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">{intl l="Oneytrust configuration"}</h4>
+                        {include
+                        file      = "includes/inner-form-toolbar.html"
+                        hide_flags = true
+                        hide_save_and_close_button = true
+                        }
+                    </div>
+                    <div class="panel-body">
+                        {form_hidden_fields form=$form}
+
+                        {if $form_error}
+                            <div class="alert alert-danger">{$form_error_message}</div>
+                        {/if}
+
+                        {form_field form=$form field='success_url'}
+                            <input type="hidden" name="{$name}" value="{url path={navigate to="current"}}"/>
+                        {/form_field}
+
+                        {form_field form=$form field="oneytrust_shop_name"}
+                            <label for="{$name}">{intl l="Nom de votre magasin"}</label>
+                            <input id="{$name}" class="form-control" type="text" name="{$name}" value="{$data}">
+                        {/form_field}
+
+
+                        {form_field form=$form field="oneytrust_payment_list"}
+                            <label for="{$name}">{intl l="Liste des IDs de modules de paiement autorisés, séparés par des virgules"}</label>
+                            <input id="{$name}" class="form-control" type="text" name="{$name}" value="{$data}">
+                        {/form_field}
+
+                        {form_field form=$form field="oneytrust_site_id_fac"}
+                            <label for="{$name}">{intl l="Site ID FAC"}</label>
+                            <input id="{$name}" class="form-control" type="text" name="{$name}" value="{$data}">
+                        {/form_field}
+
+                        {form_field form=$form field="oneytrust_site_id_cmc"}
+                            <label for="{$name}">{intl l="Site ID CMC"}</label>
+                            <input id="{$name}" class="form-control" type="text" name="{$name}" value="{$data}">
+                        {/form_field}
+
+                        {form_field form=$form field="oneytrust_paid_status"}
+                            <label for="{$name}">{intl l="ID du status \"Payée\""}</label>
+                            <input id="{$name}" class="form-control" type="text" name="{$name}" value="{$data}">
+                        {/form_field}
+
+                        {form_field form=$form field="oneytrust_host"}
+                            <label for="{$name}">{intl l="URL de l'host (Default : Pre-Prod)"}</label>
+                            <input id="{$name}" class="form-control" type="text" name="{$name}" value="{$data}">
+                        {/form_field}
+                    </div>
+
+                </form>
+            {/form}
+        </div>
+    </div>
+{/block}
+
+{block name="javascript-initialization"}
+
+{/block}

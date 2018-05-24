@@ -23,18 +23,15 @@ class OneytrustScore extends BaseModule
     /** @var string */
     const DOMAIN_NAME = 'oneytrustscore';
 
-    /** @var array  */
-    private $paymentAllow = OneytrustConst::PAYMENT_ALLOW_LIST;
-
     /**
      * @param $ref
      * @return string
      */
     public static function analyse($ref)
     {
-        $urlValidation = OneytrustConst::ONEYTRUST_GET_EVAL . OneytrustConst::SITE_ID_CMC . ".xml";
+        $urlValidation = (new OneytrustConst())->getEvalUrl() . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC) . ".xml";
         $urlValidation .= "?RefID=" . urlencode($ref);
-        $urlValidation .= "&siteidfac=" . OneytrustConst::SITE_ID_FAC;
+        $urlValidation .= "&siteidfac=" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_FAC);
         $urlValidation .= "&motifs=1";
 
         $process = curl_init($urlValidation);
@@ -65,6 +62,11 @@ class OneytrustScore extends BaseModule
             $database = new Database($con);
             $database->insertSql(null, array(__DIR__ . '/Config/thelia.sql'));
         }
+
+        /** Check if lcv_ticket_number exists, if not : creates it with a default value */
+        if (null === OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST)) {
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST, "api-ppr.sellsecure.com");
+        }
     }
 
     /**
@@ -72,6 +74,6 @@ class OneytrustScore extends BaseModule
      */
     public function getPaymentAllow()
     {
-        return $this->paymentAllow;
+        return explode(",", OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST));
     }
 }

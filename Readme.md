@@ -1,14 +1,7 @@
 # Oneytrust Score
 
-OneytrustScore is a module that sends customer informations to Oneytrust for them to
-calculate a score and tell you if you should trust the customer or not, thus helping
-you not losing money from fraud.
-
-NB1 : You need an account and site IDs provided by Oneytrust for this module to work
-with your website.
-
-NB2 : This module was originally made for labonnepointure.fr and will need some tweakings
-to work with your own website.
+Oneytrust score allow you to evaluate your customers according to the Oneytrust DB to reduce
+the chance of being frauded.
 
 ## Installation
 
@@ -28,26 +21,36 @@ composer require your-vendor/oneytrust-score-module:~1.0
 ## Usage
 
 ####Configuration :
-Change the const variables in Config/OneytrustConst.php according to your website
+NB1 : You need an account and site IDs provided by Oneytrust for this module to work
+with your website.
 
-Add any delivery module that you use but isn't already in the getDeliveryType method in OneytrustManager.php
+NB2 : If you use a delivery module that isn't DpdPickup, Colissimo, soColosimmo or LocalPickup,
+you'll need to edit the code and add them to the getDeliveryType method in OneytrustManager.php
 
 --
+
+You first need to go to the module configuration page. You can find it by
+clicking on the cog button on the right of the module name in the module list
+page, then by clicking on the wrench. Fill out the form correctly then save with
+th button on the top right.
+
+Configuration example :
+https://i.imgur.com/p7yAeCr.png
 
 The rest is automatic. The customers informations will be sent when they pay their order.
 You can see a review of all actual paid order by clicking on the "Oneytrust" button
 in the order list of Thelia Backoffice. It'll display a list of all orders that needs to be taken care of
 with these informations :
 
-Commande                : The order Reference. Clicking on it will send you to this oder page
+**Commande                :** The order Reference. Clicking on it will send you to this oder page
 
-Nom du client           : The order customer. Clicking on it will send you to this customer page
+**Nom du client           :** The order customer. Clicking on it will send you to this customer page
 
-Date                    : The date at which the order as passed. Clicking on it will redirect you to the Oneytrust page about this order
+**Date                    :** The date at which the order as passed. Clicking on it will redirect you to the Oneytrust page about this order
 
-Montant                 : The order total price
+**Montant                 :** The order total price
 
-Informations Oneytrust  : The order status, followed by the score it got at the evaluation between parenthessis, followed
+**Informations Oneytrust  :** The order status, followed by the score it got at the evaluation between parenthessis, followed
 by the reason it got this mark. Displays an error message in case of an error.
 
 ## Loop

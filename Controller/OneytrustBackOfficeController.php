@@ -6,17 +6,67 @@ namespace OneytrustScore\Controller;
 use OneytrustScore\Config\OneytrustConst;
 use OneytrustScore\EventListeners\OneytrustManager;
 use OneytrustScore\Model\OneytrustQuery;
+use OneytrustScore\OneytrustScore;
 use Thelia\Controller\Admin\BaseAdminController;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Core\Security\AccessManager;
 use Thelia\Core\Security\Resource\AdminResources;
+use Thelia\Core\Translation\Translator;
 use Thelia\Log\Tlog;
 use Thelia\Model\Order;
 use Thelia\Model\OrderQuery;
 
 class OneytrustBackOfficeController extends BaseAdminController
 {
+
+    /**
+     * Render the module config page
+     *
+     * @return \Thelia\Core\HttpFoundation\Response
+     */
+    public function viewAction()
+    {
+        return $this->render("OneytrustConfig");
+    }
+
+    /**
+     * Save the values entered in the config form to the module config DB
+     *
+     * @return mixed|null|\Symfony\Component\HttpFoundation\Response|\Thelia\Core\HttpFoundation\Response
+     */
+    public function saveAction()
+    {
+        if (null !== $response = $this->checkAuth([AdminResources::MODULE], 'OneytrustScore', AccessManager::UPDATE)) {
+            return $response;
+        }
+
+        $form = $this->createForm("oneytrust_configuration_form");
+
+        try {
+            $data = $this->validateForm($form)->getData();
+
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SHOP_NAME, $data[OneytrustConst::ONEYTRUST_CONFIG_KEY_SHOP_NAME]);
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST, $data[OneytrustConst::ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST]);
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC, $data[OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC]);
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_FAC, $data[OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_FAC]);
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAID_STATUS, $data[OneytrustConst::ONEYTRUST_CONFIG_KEY_PAID_STATUS]);
+            OneytrustScore::setConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST, $data[OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST]);
+        } catch (\Exception $e) {
+            $this->setupFormErrorContext(
+                Translator::getInstance()->trans(
+                    "Error",
+                    [],
+                    OneytrustScore::DOMAIN_NAME
+                ),
+                $e->getMessage(),
+                $form
+            );
+
+            return $this->viewAction();
+        }
+        return $this->generateSuccessRedirect($form);
+    }
 
     /**
      * Redrects to the Oneytrust page of the order with autologin
@@ -27,8 +77,8 @@ class OneytrustBackOfficeController extends BaseAdminController
     {
         $ref = $this->getRequest()->get('order_reference');
 
-        $urlValidation = OneytrustConst::ONEYTRUST_VISUCHECK . OneytrustConst::SITE_ID_CMC;
-        $urlValidation .= "/idfacs/" . OneytrustConst::SITE_ID_FAC;
+        $urlValidation = (new OneytrustConst())->getVisucheckUrl() . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC);
+        $urlValidation .= "/idfacs/" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_FAC);
         $urlValidation .= "/refids/" . $ref;
 
         $process = curl_init($urlValidation);
@@ -62,11 +112,12 @@ class OneytrustBackOfficeController extends BaseAdminController
         $log->error('----- Log Oneytrust -------');
         $log->error('---------------------------');
 
-        $orders = OrderQuery::create()->filterByStatusId(2)->filterByPaymentModuleId(OneytrustConst::PAYMENT_ALLOW_LIST)->find();
+        $orders = OrderQuery::create()->filterByStatusId(2)->filterByPaymentModuleId(explode(",", OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST)))->find();
 
         /** @var Order $order */
         foreach ($orders as $order) {
 
+            /** @noinspection PhpParamsInspection */
             if (null == $oneytrust = OneytrustQuery::create()->findOneByCommande($order->getRef())) {
 
                 $orderEvent = new OrderEvent($order);

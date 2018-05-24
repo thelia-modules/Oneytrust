@@ -6,6 +6,7 @@ namespace OneytrustScore\EventListeners;
 use OneytrustScore\Config\OneytrustConst;
 use OneytrustScore\Model\Oneytrust as OneytrustModel;
 use OneytrustScore\Model\OneytrustQuery;
+use OneytrustScore\OneytrustScore;
 use SoColissimo\Model\OrderAddressSocolissimoQuery;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Order\OrderEvent;
@@ -82,7 +83,7 @@ class OneytrustManager implements EventSubscriberInterface
         $log->error("ONEYTRUST // Payment module " . $moduleId . "");
 
         /** Accepted payment module IDs. Change accordingly to your liking and to your website */
-        if ((in_array($moduleId, OneytrustConst::PAYMENT_ALLOW_LIST)) == true) {
+        if ((in_array($moduleId, explode(",", OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST)))) == true) {
             return true;
         }
         return false;
@@ -138,14 +139,14 @@ class OneytrustManager implements EventSubscriberInterface
      */
     private function sendExport($exportXML, $reference)
     {
-        $query="siteidfac=".OneytrustConst::SITE_ID_FAC;
-        $query.="&siteidcmc=".OneytrustConst::SITE_ID_CMC;
+        $query="siteidfac=".OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_FAC);
+        $query.="&siteidcmc=".OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC);
         $query.="&controlcallback=".rawurlencode($exportXML);
 
         $curl = curl_init();
 
         curl_setopt_array($curl, array(
-            CURLOPT_URL => OneytrustConst::ONEYTRUST_SCORE . OneytrustConst::SITE_ID_CMC . ".xml",
+            CURLOPT_URL => (new OneytrustConst())->postScoreUrl() . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC) . ".xml",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -285,11 +286,13 @@ class OneytrustManager implements EventSubscriberInterface
         }
 
         $xml .= "<infocommande>";
-        $xml .= "<siteid>" . OneytrustConst::SITE_ID_CMC . "</siteid>";
+        $xml .= "<siteid>" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SITE_ID_CMC) . "</siteid>";
         $xml .= "<refid>" . $order->getRef() . "</refid>";
         $xml .= "<montant devise=\"EUR\">" . $order->getTotalAmount() . "</montant>";
         if ($customerIp) {
             $xml .= "<ip timestamp=\"" . date("Y-m-d H:i:s") . "\">" . $customerIp . "</ip>";
+        } else {
+            $xml .= "<ip timestamp=\"" . date("Y-m-d H:i:s") . "\"></ip>";
         }
         $xml .= "<transport>";
         $xml .= "<type>" . $deliveryType . "</type>";
@@ -298,7 +301,7 @@ class OneytrustManager implements EventSubscriberInterface
                 $xml .= "<nom>" . $deliveryModule->getCode() . "</nom>";
             } else {
                 /** Name of the shop in case of local pickup */
-                $xml .= "<nom>" . OneytrustConst::SHOP_NAME . "</nom>";
+                $xml .= "<nom>" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_SHOP_NAME) . "</nom>";
             }
         } else {
             $xml .= "<nom>inconnu</nom>";
@@ -318,7 +321,7 @@ class OneytrustManager implements EventSubscriberInterface
         }
         $xml .= "</transport>";
         $xml .= "<list nbproduit=\"" . $numberOfProducts . "\">";
-        /** Add every product from the order */
+        /** Add every @var OrderProduct $product from the order */
         foreach ($orderProducts as $product) {
             $xml .= "<produit ref=\"" . $product->getProductRef() . "\" type=\"13\" nb=\"" . $product->getQuantity() . "\" prixunit=\"" . $this->getPrice($product) . "\">" . $product->getTitle() . "</produit>";
         }
@@ -361,7 +364,7 @@ class OneytrustManager implements EventSubscriberInterface
             $log->error("#ONEYTRUST // La commande " . $reference . " est dans l'évènement Oneytrust (method exportOneytrustScore)");
 
             /** Check if order has status paid */
-            if ($orderEvent->getStatus() != 2) {
+            if ($orderEvent->getStatus() != OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_PAID_STATUS)) {
                 if (2 != $status = $orderEvent->getOrder()->getStatusId()) {
                     return false;
                 }

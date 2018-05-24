@@ -3,37 +3,49 @@
 namespace OneytrustScore\Config;
 
 
+use OneytrustScore\OneytrustScore;
+
 class OneytrustConst
 {
-    /** Name of the shop */
-    const SHOP_NAME                 = "Your shop name here";
+    /** Key for the name of the shop */
+    const ONEYTRUST_CONFIG_KEY_SHOP_NAME                = "oneytrust_shop_name";
 
-    /** List of payment module IDs to be accepted by OneyTrust */
-    const PAYMENT_ALLOW_LIST        = [30,8,9,3,89];
+    /** Key for the list of payment module IDs to be accepted by OneyTrust */
+    const ONEYTRUST_CONFIG_KEY_PAYMENT_ALLOW_LIST       = "oneytrust_payment_list";
 
-    /** Oneytrust client unique ID  */
-    const SITE_ID_FAC               = "0000";
+    /** Oneytrust client unique ID key  */
+    const ONEYTRUST_CONFIG_KEY_SITE_ID_FAC              = "oneytrust_site_id_fac";
 
-    /** Oneytrust shop ID */
-    const SITE_ID_CMC               = "0000";
+    /** Oneytrust shop ID key */
+    const ONEYTRUST_CONFIG_KEY_SITE_ID_CMC              = "oneytrust_site_id_cmc";
 
-    /** Oneytrust host */
-    const ONEYTRUST_HOST            = "api.sellsecure.com";                                 //PROD Settings
-    //const ONEYTRUST_HOST            = "api-ppr.sellsecure.com";                           //PRE-PROD Settings
+    /** Thelia paid status ID key  */
+    const ONEYTRUST_CONFIG_KEY_PAID_STATUS              = "oneytrust_paid_status";
+
+    /** Oneytrust Host Url key  */
+    const ONEYTRUST_CONFIG_KEY_HOST                     = "oneytrust_host";
 
     /** Oneytrust post prescore URL -- UNUSED */
-    const ONEYTRUST_POST_PRESCORE   = "https://api.sellsecure.com/prescores/";              //PROD Settings
-    //const ONEYTRUST_POST_PRESCORE   = "https://api-ppr.sellsecure.com/prescores/";        //PRE-PROD Settings
+    public function postPreScoreUrl ()
+    {
+        return "https://" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST) . "/prescores/";
+    }
 
     /** Oneytrust post score URL */
-    const ONEYTRUST_SCORE           = "https://api.sellsecure.com/stacks/";                 //PROD Settings
-    //const ONEYTRUST_SCORE           = "https://api-ppr.sellsecure.com/stacks/";           //PRE-PROD Settings
+    public function postScoreUrl ()
+    {
+        return "https://" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST) . "/stacks/";
+    }
 
     /** Oneytrust get evaluation URL */
-    const ONEYTRUST_GET_EVAL        = "https://api.sellsecure.com/idcmcs/";                 //PROD Settings
-    //const ONEYTRUST_GET_EVAL        = "https://api-ppr.sellsecure.com/idcmcs/";           //PRE-PROD Settings
+    public function getEvalUrl ()
+    {
+        return "https://" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST) . "/idcmcs/";
+    }
 
     /** Oneytrust Visucheck URL  */
-    const ONEYTRUST_VISUCHECK       = "https://api.sellsecure.com/record/idcmcs/";          //PROD Settings
-    //const ONEYTRUST_VISUCHECK       = "https://api-ppr.sellsecure.com/record/idcmcs/";    //PRE-PROD Settings
+    public function getVisucheckUrl ()
+    {
+        return "https://" . OneytrustScore::getConfigValue(OneytrustConst::ONEYTRUST_CONFIG_KEY_HOST) . "/record/idcmcs/";
+    }
 }
