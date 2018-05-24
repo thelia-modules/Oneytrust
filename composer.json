@@ -1,5 +1,5 @@
 {
-  "name": "your-vendor/oneytrust-score-module",
+  "name": "thelia/oneytrust-score-module",
   "license": "LGPL-3.0+",
   "type": "thelia-module",
   "require": {
